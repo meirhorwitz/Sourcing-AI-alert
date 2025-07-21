@@ -1,0 +1,1605 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <base target="_top">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sourcing Alerts Dashboard</title>
+  
+  <!-- Fiverr Font -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Macan:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900&display=swap" rel="stylesheet">
+  
+  <!-- Material Icons -->
+  <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+  
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    
+    :root {
+      --primary-color: #222325;
+      --secondary-color: #404145;
+      --accent-color: #1dbf73;
+      --danger-color: #c82333;
+      --warning-color: #ffb800;
+      --info-color: #007bff;
+      --border-color: #dadbdd;
+      --background-color: #f5f5f5;
+      --text-primary: #222325;
+      --text-secondary: #62646a;
+      --text-light: #74767e;
+      --card-background: #ffffff;
+      --hover-background: #f7f7f7;
+    }
+    
+    body {
+      font-family: 'Macan', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif;
+      line-height: 1.6;
+      color: var(--text-primary);
+      background: var(--background-color);
+    }
+    
+    /* Header */
+    .header {
+      background: var(--card-background);
+      border-bottom: 1px solid var(--border-color);
+      padding: 16px 24px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+    
+    .header-left {
+      display: flex;
+      align-items: center;
+      gap: 24px;
+    }
+    
+    .logo {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 20px;
+      font-weight: 700;
+      color: var(--text-primary);
+    }
+    
+    .nav-tabs {
+      display: flex;
+      gap: 24px;
+    }
+    
+    .nav-tab {
+      padding: 8px 16px;
+      color: var(--text-secondary);
+      text-decoration: none;
+      border-radius: 8px;
+      font-weight: 500;
+      transition: all 0.2s;
+      cursor: pointer;
+    }
+    
+    .nav-tab:hover {
+      background: var(--hover-background);
+      color: var(--text-primary);
+    }
+    
+    .nav-tab.active {
+      background: var(--primary-color);
+      color: white;
+    }
+    
+    /* Main Layout */
+    .main-container {
+      display: flex;
+      height: calc(100vh - 65px);
+    }
+    
+    /* Sidebar */
+    .sidebar {
+      width: 320px;
+      background: var(--card-background);
+      border-right: 1px solid var(--border-color);
+      overflow-y: auto;
+      flex-shrink: 0;
+    }
+    
+    .sidebar-header {
+      padding: 20px;
+      border-bottom: 1px solid var(--border-color);
+    }
+    
+    .search-box {
+      width: 100%;
+      padding: 10px 16px;
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      font-size: 14px;
+      font-family: inherit;
+    }
+    
+    .filter-section {
+      padding: 16px 20px;
+      border-bottom: 1px solid var(--border-color);
+    }
+    
+    .filter-label {
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--text-secondary);
+      text-transform: uppercase;
+      margin-bottom: 8px;
+    }
+    
+    .filter-options {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+    
+    .filter-chip {
+      padding: 6px 12px;
+      border: 1px solid var(--border-color);
+      border-radius: 16px;
+      font-size: 14px;
+      cursor: pointer;
+      transition: all 0.2s;
+      background: white;
+    }
+    
+    .filter-chip:hover {
+      background: var(--hover-background);
+    }
+    
+    .filter-chip.active {
+      background: var(--primary-color);
+      color: white;
+      border-color: var(--primary-color);
+    }
+    
+    /* Conversation List */
+    .conversations-list {
+      padding: 0;
+    }
+    
+    .conversation-item {
+      padding: 16px 20px;
+      border-bottom: 1px solid var(--border-color);
+      cursor: pointer;
+      transition: background 0.2s;
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+    }
+    
+    .conversation-item:hover {
+      background: var(--hover-background);
+    }
+    
+    .conversation-item.selected {
+      background: #e8f094;
+    }
+    
+    .conversation-checkbox {
+      margin-top: 2px;
+    }
+    
+    .conversation-content {
+      flex: 1;
+      min-width: 0;
+    }
+    
+    .conversation-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      margin-bottom: 4px;
+    }
+    
+    .conversation-title {
+      font-weight: 600;
+      font-size: 14px;
+      color: var(--text-primary);
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+    
+    .conversation-time {
+      font-size: 12px;
+      color: var(--text-light);
+      flex-shrink: 0;
+    }
+    
+    .conversation-preview {
+      font-size: 14px;
+      color: var(--text-secondary);
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      margin-bottom: 8px;
+    }
+    
+    .conversation-meta {
+      display: flex;
+      gap: 16px;
+      align-items: center;
+      font-size: 12px;
+      color: var(--text-light);
+    }
+    
+    .status-badge {
+      padding: 2px 8px;
+      border-radius: 12px;
+      font-size: 11px;
+      font-weight: 600;
+      text-transform: uppercase;
+    }
+    
+    .status-attention {
+      background: #fee;
+      color: var(--danger-color);
+    }
+    
+    .status-resolved {
+      background: #e8f5e9;
+      color: #2e7d32;
+    }
+    
+    .status-pending {
+      background: #fff3cd;
+      color: #856404;
+    }
+    
+    /* Content Area */
+    .content-area {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+    
+    .content-header {
+      padding: 20px 24px;
+      background: var(--card-background);
+      border-bottom: 1px solid var(--border-color);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    
+    .content-title {
+      font-size: 20px;
+      font-weight: 700;
+      color: var(--text-primary);
+    }
+    
+    .action-buttons {
+      display: flex;
+      gap: 12px;
+    }
+    
+    .btn {
+      padding: 10px 20px;
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+      background: white;
+      color: var(--text-primary);
+      font-family: inherit;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+    }
+    
+    .btn:hover {
+      background: var(--hover-background);
+    }
+    
+    .btn-primary {
+      background: var(--primary-color);
+      color: white;
+      border-color: var(--primary-color);
+    }
+    
+    .btn-primary:hover {
+      background: var(--secondary-color);
+      border-color: var(--secondary-color);
+    }
+    
+    .btn-danger {
+      background: var(--danger-color);
+      color: white;
+      border-color: var(--danger-color);
+    }
+    
+    .btn-danger:hover {
+      background: #a02128;
+      border-color: #a02128;
+    }
+    
+    /* Conversation View */
+    .conversation-view {
+      flex: 1;
+      overflow-y: auto;
+      padding: 24px;
+      background: var(--background-color);
+    }
+    
+    .empty-state {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      height: 100%;
+      color: var(--text-secondary);
+    }
+    
+    .empty-state-icon {
+      font-size: 64px;
+      color: var(--border-color);
+      margin-bottom: 16px;
+    }
+    
+    .empty-state-text {
+      font-size: 18px;
+      margin-bottom: 8px;
+    }
+    
+    .empty-state-subtext {
+      font-size: 14px;
+      color: var(--text-light);
+    }
+    
+    /* Conversation Details */
+    .conversation-details {
+      background: var(--card-background);
+      border-radius: 12px;
+      padding: 24px;
+      margin-bottom: 24px;
+    }
+    
+    .detail-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 24px;
+      margin-bottom: 24px;
+    }
+    
+    .detail-item {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+    
+    .detail-label {
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--text-secondary);
+      text-transform: uppercase;
+    }
+    
+    .detail-value {
+      font-size: 16px;
+      color: var(--text-primary);
+    }
+    
+    /* AI Analysis Box */
+    .ai-analysis {
+      background: #fee;
+      border: 1px solid var(--danger-color);
+      border-radius: 8px;
+      padding: 16px;
+      margin-bottom: 24px;
+    }
+    
+    .ai-analysis-header {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 12px;
+      color: var(--danger-color);
+      font-weight: 600;
+    }
+    
+    .ai-analysis-content {
+      color: var(--text-primary);
+      line-height: 1.6;
+    }
+    
+    /* Messages */
+    .messages-container {
+      background: var(--card-background);
+      border-radius: 12px;
+      padding: 24px;
+    }
+    
+    .messages-header {
+      font-size: 18px;
+      font-weight: 700;
+      margin-bottom: 20px;
+      color: var(--text-primary);
+    }
+    
+    .message {
+      margin-bottom: 20px;
+      display: flex;
+      gap: 12px;
+    }
+    
+    .message-avatar {
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      background: var(--border-color);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 600;
+      font-size: 14px;
+      flex-shrink: 0;
+    }
+    
+    .message-buyer {
+      background: var(--info-color);
+      color: white;
+    }
+    
+    .message-seller {
+      background: var(--accent-color);
+      color: white;
+    }
+    
+    .message-content {
+      flex: 1;
+    }
+    
+    .message-header {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 4px;
+    }
+    
+    .message-sender {
+      font-weight: 600;
+      font-size: 14px;
+    }
+    
+    .message-time {
+      font-size: 12px;
+      color: var(--text-light);
+    }
+    
+    .message-text {
+      font-size: 14px;
+      line-height: 1.6;
+      color: var(--text-primary);
+    }
+    
+    .message-highlight {
+      background: #fffacd;
+      padding: 2px 4px;
+      border-radius: 4px;
+    }
+    
+    /* Settings Page */
+    .settings-container {
+      max-width: 800px;
+      margin: 0 auto;
+      padding: 24px;
+    }
+    
+    .settings-section {
+      background: var(--card-background);
+      border-radius: 12px;
+      padding: 24px;
+      margin-bottom: 24px;
+    }
+    
+    .settings-title {
+      font-size: 18px;
+      font-weight: 700;
+      margin-bottom: 20px;
+      color: var(--text-primary);
+    }
+    
+    .form-group {
+      margin-bottom: 20px;
+    }
+    
+    .form-label {
+      display: block;
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--text-primary);
+      margin-bottom: 8px;
+    }
+    
+    .form-input {
+      width: 100%;
+      padding: 10px 16px;
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      font-size: 14px;
+      font-family: inherit;
+    }
+    
+    .form-textarea {
+      width: 100%;
+      min-height: 120px;
+      padding: 10px 16px;
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      font-size: 14px;
+      font-family: inherit;
+      resize: vertical;
+    }
+    
+    .form-select {
+      width: 100%;
+      padding: 10px 16px;
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      font-size: 14px;
+      font-family: inherit;
+      background: white;
+    }
+    
+    .form-help {
+      font-size: 12px;
+      color: var(--text-light);
+      margin-top: 4px;
+    }
+    
+    .form-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 20px;
+    }
+    
+    .checkbox-group {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    
+    /* Loading States */
+    .loading {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 40px;
+      color: var(--text-secondary);
+    }
+    
+    .spinner {
+      width: 24px;
+      height: 24px;
+      border: 3px solid var(--border-color);
+      border-top-color: var(--primary-color);
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+    }
+    
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+    
+    /* Toast Notifications */
+    .toast {
+      position: fixed;
+      bottom: 24px;
+      right: 24px;
+      background: var(--primary-color);
+      color: white;
+      padding: 16px 24px;
+      border-radius: 8px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      transform: translateY(100px);
+      opacity: 0;
+      transition: all 0.3s;
+    }
+    
+    .toast.show {
+      transform: translateY(0);
+      opacity: 1;
+    }
+    
+    .toast.error {
+      background: var(--danger-color);
+    }
+    
+    .toast.success {
+      background: var(--accent-color);
+    }
+    
+    /* Bulk Actions Bar */
+    .bulk-actions {
+      position: fixed;
+      bottom: 24px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: var(--primary-color);
+      color: white;
+      padding: 12px 24px;
+      border-radius: 8px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+      display: none;
+      align-items: center;
+      gap: 16px;
+    }
+    
+    .bulk-actions.show {
+      display: flex;
+    }
+    
+    .bulk-count {
+      font-weight: 600;
+    }
+    
+    .bulk-actions-buttons {
+      display: flex;
+      gap: 8px;
+    }
+    
+    .btn-small {
+      padding: 6px 12px;
+      font-size: 12px;
+    }
+    
+    /* Responsive */
+    @media (max-width: 768px) {
+      .sidebar {
+        position: fixed;
+        left: -320px;
+        height: 100vh;
+        z-index: 200;
+        transition: left 0.3s;
+      }
+      
+      .sidebar.open {
+        left: 0;
+      }
+      
+      .main-container {
+        flex-direction: column;
+      }
+      
+      .content-area {
+        width: 100%;
+      }
+    }
+  </style>
+</head>
+<body>
+  <!-- Header -->
+  <div class="header">
+    <div class="header-left">
+      <div class="logo">
+        <span class="material-icons">dashboard</span>
+        Sourcing Alerts Dashboard
+      </div>
+      <div class="nav-tabs">
+        <a class="nav-tab active" onclick="showTab('conversations')">Conversations</a>
+        <a class="nav-tab" onclick="showTab('settings')">Settings</a>
+      </div>
+    </div>
+    <div class="header-right">
+      <button class="btn" onclick="showManualActions()">
+        <span class="material-icons">build</span>
+        Manual Actions
+      </button>
+    </div>
+  </div>
+
+  <!-- Main Container -->
+  <div class="main-container" id="conversationsTab">
+    <!-- Sidebar -->
+    <div class="sidebar">
+      <div class="sidebar-header">
+        <input type="text" class="search-box" placeholder="Search conversations..." onkeyup="filterConversations(this.value)">
+        <button class="btn btn-small" style="margin-top: 8px; width: 100%;" onclick="loadConversations()">
+          <span class="material-icons">refresh</span>
+          Refresh
+        </button>
+      </div>
+      
+      <div class="filter-section">
+        <div class="filter-label">Status</div>
+        <div class="filter-options">
+          <button class="filter-chip active" onclick="filterByStatus('all')">All</button>
+          <button class="filter-chip" onclick="filterByStatus('attention')">Needs Attention</button>
+          <button class="filter-chip" onclick="filterByStatus('resolved')">Resolved</button>
+        </div>
+      </div>
+      
+      <div class="filter-section">
+        <div class="filter-label">Time</div>
+        <div class="filter-options">
+          <button class="filter-chip active" onclick="filterByTime('all')">All Time</button>
+          <button class="filter-chip" onclick="filterByTime('24h')">Last 24h</button>
+          <button class="filter-chip" onclick="filterByTime('48h')">Last 48h</button>
+          <button class="filter-chip" onclick="filterByTime('week')">Last Week</button>
+        </div>
+      </div>
+      
+      <div class="conversations-list" id="conversationsList">
+        <div class="loading">
+          <div class="spinner"></div>
+        </div>
+      </div>
+    </div>
+    
+    <!-- Content Area -->
+    <div class="content-area">
+      <div class="content-header">
+        <h2 class="content-title" id="contentTitle">Select a conversation</h2>
+        <div class="action-buttons" id="actionButtons" style="display: none;">
+          <button class="btn" onclick="openConversationLink()">
+            <span class="material-icons">open_in_new</span>
+            Open in Houston
+          </button>
+          <button class="btn btn-danger" onclick="sendManualAlert()">
+            <span class="material-icons">warning</span>
+            Send Alert
+          </button>
+        </div>
+      </div>
+      
+      <div class="conversation-view" id="conversationView">
+        <div class="empty-state">
+          <span class="material-icons empty-state-icon">chat_bubble_outline</span>
+          <div class="empty-state-text">No conversation selected</div>
+          <div class="empty-state-subtext">Select a conversation from the list to view details</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Settings Tab -->
+  <div class="settings-container" id="settingsTab" style="display: none;">
+    <div class="settings-section">
+      <h2 class="settings-title">OpenAI Configuration</h2>
+      <div class="form-group">
+        <label class="form-label">API Key</label>
+        <input type="password" class="form-input" id="apiKey" placeholder="Configured in Script Properties" disabled style="background: #f5f5f5;">
+        <div class="form-help">API key is managed in Script Properties under 'OPENAI_API_KEY'</div>
+      </div>
+      
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">Model</label>
+          <select class="form-select" id="model">
+            <option value="gpt-4o-mini">GPT-4o Mini</option>
+            <option value="gpt-4o">GPT-4o</option>
+            <option value="gpt-4-turbo">GPT-4 Turbo</option>
+            <option value="gpt-3.5-turbo">GPT-3.5 Turbo</option>
+          </select>
+        </div>
+        
+        <div class="form-group">
+          <label class="form-label">Temperature</label>
+          <input type="number" class="form-input" id="temperature" min="0" max="2" step="0.1" value="0.2">
+          <div class="form-help">Lower values make output more deterministic</div>
+        </div>
+      </div>
+      
+      <div class="form-group">
+        <label class="form-label">Prompt Template</label>
+        <textarea class="form-textarea" id="prompt"></textarea>
+        <div class="form-help">The prompt used to analyze conversations</div>
+      </div>
+    </div>
+    
+    <div class="settings-section">
+      <h2 class="settings-title">Email Notifications</h2>
+      <div class="form-group">
+        <label class="form-label">Email Recipients</label>
+        <input type="text" class="form-input" id="emailRecipients" placeholder="email1@example.com, email2@example.com">
+        <div class="form-help">Comma-separated list of email addresses</div>
+      </div>
+      
+      <div class="form-group">
+        <label class="form-label">Conditional Recipient (>48h alerts)</label>
+        <input type="email" class="form-input" id="conditionalRecipient" placeholder="email@example.com">
+        <div class="form-help">Receives alerts only for conversations with >48h seller response time</div>
+      </div>
+    </div>
+    
+    <div class="settings-section">
+      <h2 class="settings-title">Automation Triggers</h2>
+      <div class="form-group">
+        <div class="checkbox-group">
+          <input type="checkbox" id="dataUpdateEnabled">
+          <label for="dataUpdateEnabled">Enable daily data sync from BigQuery</label>
+        </div>
+        <div class="form-group" style="margin-left: 24px;">
+          <label class="form-label">Time</label>
+          <input type="time" class="form-input" id="dataUpdateTime" value="10:00" style="width: 200px;">
+        </div>
+      </div>
+      
+      <div class="form-group">
+        <div class="checkbox-group">
+          <input type="checkbox" id="aiProcessingEnabled">
+          <label for="aiProcessingEnabled">Enable automatic AI processing</label>
+        </div>
+        <div class="form-group" style="margin-left: 24px;">
+          <label class="form-label">Interval (minutes)</label>
+          <input type="number" class="form-input" id="aiProcessingInterval" value="15" min="5" max="60" style="width: 200px;">
+        </div>
+      </div>
+    </div>
+    
+    <div style="text-align: center; margin-top: 32px;">
+      <button class="btn btn-primary" onclick="saveSettings()">
+        <span class="material-icons">save</span>
+        Save Settings
+      </button>
+    </div>
+  </div>
+
+  <!-- Bulk Actions Bar -->
+  <div class="bulk-actions" id="bulkActions">
+    <div class="bulk-count">
+      <span id="selectedCount">0</span> conversations selected
+    </div>
+    <div class="bulk-actions-buttons">
+      <button class="btn btn-small" onclick="sendBulkNotification()">
+        <span class="material-icons">email</span>
+        Send Notification
+      </button>
+      <button class="btn btn-small" onclick="exportSelected('csv')">
+        <span class="material-icons">download</span>
+        Export CSV
+      </button>
+      <button class="btn btn-small" onclick="exportSelected('json')">
+        <span class="material-icons">code</span>
+        Export JSON
+      </button>
+      <button class="btn btn-small" onclick="copySelected()">
+        <span class="material-icons">content_copy</span>
+        Copy
+      </button>
+      <button class="btn btn-small" onclick="clearSelection()">
+        <span class="material-icons">clear</span>
+        Clear
+      </button>
+    </div>
+  </div>
+
+  <!-- Toast Notification -->
+  <div class="toast" id="toast">
+    <span class="material-icons" id="toastIcon">info</span>
+    <span id="toastMessage">Notification</span>
+  </div>
+
+  <!-- Manual Actions Modal -->
+  <div id="manualActionsModal" style="display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.5); z-index: 1000;">
+    <div style="background: white; max-width: 500px; margin: 100px auto; padding: 32px; border-radius: 12px;">
+      <h3 style="margin-bottom: 24px;">Manual Actions</h3>
+      <div style="display: flex; flex-direction: column; gap: 16px;">
+        <button class="btn btn-primary" onclick="runManualDataSync()">
+          <span class="material-icons">sync</span>
+          Sync Data from BigQuery
+        </button>
+        <button class="btn btn-primary" onclick="runManualAiProcessing()">
+          <span class="material-icons">psychology</span>
+          Run AI Processing on All Rows
+        </button>
+        <button class="btn btn-primary" onclick="runManualEmailCheck()">
+          <span class="material-icons">email</span>
+          Send Daily Email Digest
+        </button>
+        <hr style="border: 1px solid #e0e0e0;">
+        <button class="btn" onclick="testConnection()">
+          <span class="material-icons">wifi</span>
+          Test Connection
+        </button>
+        <button class="btn" onclick="getSheetInfo()">
+          <span class="material-icons">info</span>
+          Get Sheet Info
+        </button>
+        <button class="btn" onclick="debugSheetData()">
+          <span class="material-icons">bug_report</span>
+          Debug Sheet Data
+        </button>
+        <button class="btn" onclick="closeManualActions()">Cancel</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Global state
+    let conversations = [];
+    let selectedConversation = null;
+    let selectedConversations = new Set();
+    let currentFilter = { status: 'all', time: 'all', search: '' };
+
+    // Initialize
+    document.addEventListener('DOMContentLoaded', function() {
+      // Simply load conversations without the initial check
+      loadConversations();
+      loadSettings();
+    });
+    
+    // Check if Sheet1 has data and load conversations
+   function checkDataAndLoad() {
+  google.script.run
+    .withSuccessHandler(function(result) {
+      console.log('Initial data check:', result);
+      // Safely handle null or undefined results, or results with an error property
+      if (!result || result.error) {
+        const errorMessage = result ? result.error : 'No result returned from server.';
+        console.error('Data check error:', errorMessage);
+        showToast('Could not verify sheet data. Please ensure "Sheet1" exists and has data.', 'error');
+        // Still attempt to load, but the user is notified of a likely issue.
+        loadConversations();
+      } else if (!result.hasData) {
+        showToast('No data rows found in "Sheet1". Please sync data from BigQuery.', 'warning');
+        // Show manual actions modal automatically to guide the user
+        showManualActions();
+      } else {
+        // Success case
+        loadConversations();
+      }
+    })
+    .withFailureHandler(function(error) {
+      console.error('Data check script call failed:', error);
+      showToast('Error communicating with the server: ' + error.message, 'error');
+    })
+    .testGetSheetData();
+}
+
+    // Tab switching
+    function showTab(tab) {
+      document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
+      event.target.classList.add('active');
+      
+      if (tab === 'conversations') {
+        document.getElementById('conversationsTab').style.display = 'flex';
+        document.getElementById('settingsTab').style.display = 'none';
+      } else if (tab === 'settings') {
+        document.getElementById('conversationsTab').style.display = 'none';
+        document.getElementById('settingsTab').style.display = 'block';
+      }
+    }
+
+    // Load conversations
+    function loadConversations() {
+  console.log('Starting to load conversations...');
+  document.getElementById('conversationsList').innerHTML = '<div class="loading"><div class="spinner"></div></div>';
+
+  google.script.run
+    .withSuccessHandler(function(response) {
+      // Check for a server-side error message in the response
+      if (response && response.error) {
+        console.error('Failed to load conversations:', response.error);
+        showToast('Error: ' + response.error, 'error');
+        conversations = [];
+      } 
+      // Check for valid data in the response
+      else if (response && response.data) {
+        console.log(`Successfully loaded ${response.data.length} conversations.`);
+        conversations = response.data || [];
+      } 
+      // Handle an unexpected response (like null)
+      else {
+        console.error('Received an invalid or null response from the server.', response);
+        showToast('An unknown error occurred while loading data. The data set may be too large.', 'error');
+        conversations = [];
+      }
+      renderConversationsList();
+    })
+    .withFailureHandler(function(error) {
+      console.error('Script execution failed:', error);
+      showToast('Failed to communicate with the server: ' + error.message, 'error');
+      conversations = [];
+      renderConversationsList();
+    })
+    .getConversations();
+}
+
+    // Render conversations list
+    function renderConversationsList() {
+      const listContainer = document.getElementById('conversationsList');
+      if (!listContainer) return;
+      
+      const filteredConversations = filterConversationsData();
+      
+      if (!filteredConversations || filteredConversations.length === 0) {
+        listContainer.innerHTML = '<div class="empty-state" style="padding: 40px;"><div>No conversations found</div></div>';
+        return;
+      }
+      
+      listContainer.innerHTML = filteredConversations.map(conv => {
+        try {
+          const needsAttention = conv['need attention?']?.toLowerCase() === 'yes';
+          const status = needsAttention ? 'attention' : 'resolved';
+          const isSelected = selectedConversations.has(conv.conversation_id);
+          
+          return `
+            <div class="conversation-item ${selectedConversation?.conversation_id === conv.conversation_id ? 'selected' : ''}" 
+                 onclick="selectConversation('${conv.conversation_id}')">
+              <input type="checkbox" 
+                     class="conversation-checkbox" 
+                     ${isSelected ? 'checked' : ''}
+                     onclick="toggleConversationSelection(event, '${conv.conversation_id}')">
+              <div class="conversation-content">
+                <div class="conversation-header">
+                  <div class="conversation-title">${conv.buyer_name || 'Unknown Buyer'} - ${conv.seller_name || 'Unknown Seller'}</div>
+                  <div class="conversation-time">${formatTime(conv.last_message_at)}</div>
+                </div>
+                <div class="conversation-preview">${conv.last_message_summary || 'No summary available'}</div>
+                <div class="conversation-meta">
+                  <span class="status-badge status-${status}">${conv.status || 'Unknown'}</span>
+                  <span>${conv.inbox_message_count || 0} messages</span>
+                </div>
+              </div>
+            </div>
+          `;
+        } catch (e) {
+          console.error('Error rendering conversation:', conv, e);
+          return '';
+        }
+      }).join('');
+    }
+
+    // Filter conversations based on current filters
+    function filterConversationsData() {
+      if (!conversations || !Array.isArray(conversations)) {
+        return [];
+      }
+      
+      return conversations.filter(conv => {
+        if (!conv) return false;
+        
+        // Status filter
+        if (currentFilter.status !== 'all') {
+          const needsAttention = conv['need attention?']?.toLowerCase() === 'yes';
+          if (currentFilter.status === 'attention' && !needsAttention) return false;
+          if (currentFilter.status === 'resolved' && needsAttention) return false;
+        }
+        
+        // Time filter
+        if (currentFilter.time !== 'all' && conv.last_message_at) {
+          const messageTime = new Date(conv.last_message_at);
+          const now = new Date();
+          const hoursDiff = (now - messageTime) / (1000 * 60 * 60);
+          
+          if (currentFilter.time === '24h' && hoursDiff > 24) return false;
+          if (currentFilter.time === '48h' && hoursDiff > 48) return false;
+          if (currentFilter.time === 'week' && hoursDiff > 168) return false;
+        }
+        
+        // Search filter
+        if (currentFilter.search) {
+          const searchLower = currentFilter.search.toLowerCase();
+          const searchableText = [
+            conv.buyer_name,
+            conv.seller_name,
+            conv.conversation_messages,
+            conv.status,
+            conv.why
+          ].filter(Boolean).join(' ').toLowerCase();
+          
+          if (!searchableText.includes(searchLower)) return false;
+        }
+        
+        return true;
+      });
+    }
+
+    // Filter functions
+    function filterByStatus(status) {
+      currentFilter.status = status;
+      document.querySelectorAll('.filter-section:first-child .filter-chip').forEach(chip => {
+        chip.classList.remove('active');
+      });
+      event.target.classList.add('active');
+      renderConversationsList();
+    }
+
+    function filterByTime(time) {
+      currentFilter.time = time;
+      document.querySelectorAll('.filter-section:last-child .filter-chip').forEach(chip => {
+        chip.classList.remove('active');
+      });
+      event.target.classList.add('active');
+      renderConversationsList();
+    }
+
+    function filterConversations(search) {
+      currentFilter.search = search;
+      renderConversationsList();
+    }
+
+    // Select conversation
+    function selectConversation(conversationId) {
+      selectedConversation = conversations.find(c => c.conversation_id === conversationId);
+      if (!selectedConversation) return;
+      
+      renderConversationsList();
+      renderConversationDetails();
+      
+      document.getElementById('contentTitle').textContent = `${selectedConversation.buyer_name} - ${selectedConversation.seller_name}`;
+      document.getElementById('actionButtons').style.display = 'flex';
+    }
+
+    // Render conversation details
+    function renderConversationDetails() {
+      if (!selectedConversation) return;
+      
+      const needsAttention = selectedConversation['need attention?']?.toLowerCase() === 'yes';
+      const messages = parseConversationMessages(selectedConversation.conversation_messages);
+      
+      const detailsHtml = `
+        <div class="conversation-details">
+          <div class="detail-grid">
+            <div class="detail-item">
+              <div class="detail-label">Buyer</div>
+              <div class="detail-value">${selectedConversation.buyer_name || 'Unknown'}</div>
+            </div>
+            <div class="detail-item">
+              <div class="detail-label">Seller</div>
+              <div class="detail-value">${selectedConversation.seller_name || 'Unknown'}</div>
+            </div>
+            <div class="detail-item">
+              <div class="detail-label">Expert</div>
+              <div class="detail-value">${selectedConversation.expert_email || 'Not assigned'}</div>
+            </div>
+            <div class="detail-item">
+              <div class="detail-label">Order Status</div>
+              <div class="detail-value">${selectedConversation.order_flag || 'No order'}</div>
+            </div>
+            <div class="detail-item">
+              <div class="detail-label">Messages</div>
+              <div class="detail-value">${selectedConversation.inbox_message_count || 0}</div>
+            </div>
+            <div class="detail-item">
+              <div class="detail-label">Days to Contact</div>
+              <div class="detail-value">${selectedConversation.days_to_make_contact || 'N/A'}</div>
+            </div>
+          </div>
+        </div>
+        
+        ${needsAttention ? `
+          <div class="ai-analysis">
+            <div class="ai-analysis-header">
+              <span class="material-icons">warning</span>
+              AI Analysis - Attention Required
+            </div>
+            <div class="ai-analysis-content">
+              <strong>Status:</strong> ${selectedConversation.status}<br>
+              <strong>Reason:</strong> ${selectedConversation.why}
+            </div>
+          </div>
+        ` : ''}
+        
+        <div class="messages-container">
+          <div class="messages-header">Conversation Messages</div>
+          ${messages.map(msg => renderMessage(msg, selectedConversation.why)).join('')}
+        </div>
+      `;
+      
+      document.getElementById('conversationView').innerHTML = detailsHtml;
+    }
+
+    // Parse conversation messages
+    function parseConversationMessages(messagesText) {
+  if (!messagesText) return [];
+  
+  const messages = [];
+  // Corrected line: Split by the newline character '\n', not the literal string '\\n'
+  const lines = messagesText.split('\n\n'); 
+  
+  lines.forEach(line => {
+    // The regex might need to be slightly adjusted for multiline content within a single message
+    // Using 's' flag allows '.' to match newline characters within the message text itself.
+    const match = line.match(/^(\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}) – (Buyer|Seller): (.*)$/s);
+    if (match) {
+      messages.push({
+        timestamp: match[1],
+        sender: match[2],
+        text: match[3].trim() // Use trim() to clean up whitespace
+      });
+    }
+  });
+  
+  return messages;
+}
+
+    // Render individual message
+    function renderMessage(message, analysisReason) {
+      const isBuyer = message.sender === 'Buyer';
+      const shouldHighlight = analysisReason && message.text.toLowerCase().includes(analysisReason.toLowerCase().substring(0, 20));
+      
+      return `
+        <div class="message">
+          <div class="message-avatar ${isBuyer ? 'message-buyer' : 'message-seller'}">
+            ${isBuyer ? 'B' : 'S'}
+          </div>
+          <div class="message-content">
+            <div class="message-header">
+              <span class="message-sender">${message.sender}</span>
+              <span class="message-time">${formatTime(message.timestamp)}</span>
+            </div>
+            <div class="message-text">
+              ${shouldHighlight ? `<span class="message-highlight">${message.text}</span>` : message.text}
+            </div>
+          </div>
+        </div>
+      `;
+    }
+
+    // Toggle conversation selection
+    function toggleConversationSelection(event, conversationId) {
+      event.stopPropagation();
+      
+      if (selectedConversations.has(conversationId)) {
+        selectedConversations.delete(conversationId);
+      } else {
+        selectedConversations.add(conversationId);
+      }
+      
+      updateBulkActions();
+    }
+
+    // Update bulk actions bar
+    function updateBulkActions() {
+      const bulkActions = document.getElementById('bulkActions');
+      const selectedCount = document.getElementById('selectedCount');
+      
+      if (selectedConversations.size > 0) {
+        bulkActions.classList.add('show');
+        selectedCount.textContent = selectedConversations.size;
+      } else {
+        bulkActions.classList.remove('show');
+      }
+    }
+
+    // Clear selection
+    function clearSelection() {
+      selectedConversations.clear();
+      renderConversationsList();
+      updateBulkActions();
+    }
+
+    // Send bulk notification
+    function sendBulkNotification() {
+      if (selectedConversations.size === 0) return;
+      
+      const conversationIds = Array.from(selectedConversations);
+      
+      google.script.run
+        .withSuccessHandler(function(result) {
+          if (result.success) {
+            showToast(result.message, 'success');
+            clearSelection();
+          } else {
+            showToast(result.message, 'error');
+          }
+        })
+        .withFailureHandler(function(error) {
+          showToast('Failed to send notifications', 'error');
+          console.error(error);
+        })
+        .sendManualNotifications(conversationIds);
+    }
+
+    // Export selected conversations
+    function exportSelected(format) {
+      if (selectedConversations.size === 0) return;
+      
+      const conversationIds = Array.from(selectedConversations);
+      
+      google.script.run
+        .withSuccessHandler(function(data) {
+          if (!data) {
+            showToast('Export failed', 'error');
+            return;
+          }
+          
+          // Create download
+          const blob = new Blob([data], { type: format === 'csv' ? 'text/csv' : 'application/json' });
+          const url = URL.createObjectURL(blob);
+          const a = document.createElement('a');
+          a.href = url;
+          a.download = `conversations_export_${new Date().toISOString().split('T')[0]}.${format}`;
+          a.click();
+          URL.revokeObjectURL(url);
+          
+          showToast(`Exported ${selectedConversations.size} conversations`, 'success');
+        })
+        .withFailureHandler(function(error) {
+          showToast('Export failed', 'error');
+          console.error(error);
+        })
+        .exportConversations(conversationIds, format);
+    }
+
+    // Copy selected conversations
+    function copySelected() {
+      if (selectedConversations.size === 0) return;
+      
+      const conversationIds = Array.from(selectedConversations);
+      
+      google.script.run
+        .withSuccessHandler(function(data) {
+          if (!data) {
+            showToast('Copy failed', 'error');
+            return;
+          }
+          
+          navigator.clipboard.writeText(data).then(() => {
+            showToast(`Copied ${selectedConversations.size} conversations to clipboard`, 'success');
+          }).catch(() => {
+            showToast('Failed to copy to clipboard', 'error');
+          });
+        })
+        .withFailureHandler(function(error) {
+          showToast('Copy failed', 'error');
+          console.error(error);
+        })
+        .exportConversations(conversationIds, 'csv');
+    }
+
+    // Send manual alert for single conversation
+    function sendManualAlert() {
+      if (!selectedConversation) return;
+      
+      google.script.run
+        .withSuccessHandler(function(result) {
+          if (result.success) {
+            showToast(result.message, 'success');
+          } else {
+            showToast(result.message, 'error');
+          }
+        })
+        .withFailureHandler(function(error) {
+          showToast('Failed to send alert', 'error');
+          console.error(error);
+        })
+        .sendManualNotifications([selectedConversation.conversation_id]);
+    }
+
+    // Open conversation link
+    function openConversationLink() {
+      if (selectedConversation && selectedConversation.conversation_link) {
+        window.open(selectedConversation.conversation_link, '_blank');
+      }
+    }
+
+    // Settings functions
+    function loadSettings() {
+      google.script.run
+        .withSuccessHandler(function(settings) {
+          // API key is displayed as configured in properties (read-only)
+          document.getElementById('apiKey').value = settings.openaiApiKey ? 'Configured' : 'Not configured';
+          document.getElementById('model').value = settings.model || 'gpt-4o-mini';
+          document.getElementById('temperature').value = settings.temperature || 0.2;
+          document.getElementById('prompt').value = settings.prompt || '';
+          document.getElementById('emailRecipients').value = settings.emailRecipients.join(', ');
+          document.getElementById('conditionalRecipient').value = settings.conditionalRecipient || '';
+          document.getElementById('dataUpdateEnabled').checked = settings.triggers.dataUpdate.enabled;
+          document.getElementById('dataUpdateTime').value = settings.triggers.dataUpdate.time;
+          document.getElementById('aiProcessingEnabled').checked = settings.triggers.aiProcessing.enabled;
+          document.getElementById('aiProcessingInterval').value = settings.triggers.aiProcessing.interval;
+        })
+        .withFailureHandler(function(error) {
+          console.error('Failed to load settings:', error);
+        })
+        .getSettings();
+    }
+
+    function saveSettings() {
+      const settings = {
+        // Don't include API key as it's managed in script properties
+        model: document.getElementById('model').value,
+        temperature: parseFloat(document.getElementById('temperature').value),
+        maxTokens: 300,
+        prompt: document.getElementById('prompt').value,
+        emailRecipients: document.getElementById('emailRecipients').value.split(',').map(e => e.trim()).filter(e => e),
+        conditionalRecipient: document.getElementById('conditionalRecipient').value,
+        triggers: {
+          dataUpdate: {
+            enabled: document.getElementById('dataUpdateEnabled').checked,
+            time: document.getElementById('dataUpdateTime').value
+          },
+          aiProcessing: {
+            enabled: document.getElementById('aiProcessingEnabled').checked,
+            interval: parseInt(document.getElementById('aiProcessingInterval').value)
+          }
+        }
+      };
+      
+      google.script.run
+        .withSuccessHandler(function() {
+          showToast('Settings saved successfully', 'success');
+        })
+        .withFailureHandler(function(error) {
+          showToast('Failed to save settings', 'error');
+          console.error(error);
+        })
+        .saveSettings(settings);
+    }
+
+    // Manual actions
+    function showManualActions() {
+      document.getElementById('manualActionsModal').style.display = 'block';
+    }
+
+    function closeManualActions() {
+      document.getElementById('manualActionsModal').style.display = 'none';
+    }
+
+    function runManualDataSync() {
+      closeManualActions();
+      showToast('Starting data sync...', 'info');
+      
+      google.script.run
+        .withSuccessHandler(function(result) {
+          if (result.success) {
+            showToast(result.message, 'success');
+            loadConversations();
+          } else {
+            showToast(result.message, 'error');
+          }
+        })
+        .withFailureHandler(function(error) {
+          showToast('Data sync failed', 'error');
+          console.error(error);
+        })
+        .runManualDataSync();
+    }
+
+    function runManualAiProcessing() {
+      closeManualActions();
+      showToast('Starting AI processing...', 'info');
+      
+      google.script.run
+        .withSuccessHandler(function(result) {
+          if (result.success) {
+            showToast(result.message, 'success');
+            loadConversations();
+          } else {
+            showToast(result.message, 'error');
+          }
+        })
+        .withFailureHandler(function(error) {
+          showToast('AI processing failed', 'error');
+          console.error(error);
+        })
+        .runManualAiProcessing();
+    }
+
+    function runManualEmailCheck() {
+      closeManualActions();
+      showToast('Sending email digest...', 'info');
+      
+      google.script.run
+        .withSuccessHandler(function() {
+          showToast('Email digest sent successfully', 'success');
+        })
+        .withFailureHandler(function(error) {
+          showToast('Failed to send email digest', 'error');
+          console.error(error);
+        })
+        .processSheetForEmailNotifications();
+    }
+
+    // Debug function
+    function debugSheetData() {
+      google.script.run
+        .withSuccessHandler(function(result) {
+          console.log('Sheet Debug Info:', result);
+          if (result.error) {
+            alert(`Error: ${result.error}\n\nAvailable sheets: ${result.sheets?.join(', ') || 'Unknown'}`);
+          } else {
+            alert(`Sheet: ${result.sheetName}
+Total Rows: ${result.totalRows}
+Has Data: ${result.hasData}
+Headers: ${result.headers.slice(0, 5).join(', ')}...
+First Row Sample: ${JSON.stringify(result.firstDataRow?.slice(0, 3))}`);
+          }
+        })
+        .withFailureHandler(function(error) {
+          console.error('Debug failed:', error);
+          alert('Debug failed: ' + error.message);
+        })
+        .testGetSheetData();
+    }
+
+    // Test connection
+    function testConnection() {
+      google.script.run
+        .withSuccessHandler(function(result) {
+          console.log('Connection test:', result);
+          alert(`Connection test: ${result.success ? 'Success' : 'Failed'}\n${result.message}`);
+        })
+        .withFailureHandler(function(error) {
+          console.error('Connection test failed:', error);
+          alert('Connection test failed: ' + error.message);
+        })
+        .testConnection();
+    }
+
+    // Get sheet info
+    function getSheetInfo() {
+      google.script.run
+        .withSuccessHandler(function(result) {
+          console.log('Sheet info:', result);
+          if (result.error) {
+            alert(`Error: ${result.error}`);
+          } else {
+            const sheetsInfo = result.sheets.map(s => 
+              `${s.name}: ${s.lastRow} rows, ${s.lastCol} cols`
+            ).join('\n');
+            alert(`Spreadsheet: ${result.spreadsheetName}
+Target Sheet: ${result.targetSheet}
+Query Sheet: ${result.querySheet}
+
+Sheets:
+${sheetsInfo}`);
+          }
+        })
+        .withFailureHandler(function(error) {
+          console.error('Sheet info failed:', error);
+          alert('Failed to get sheet info: ' + error.message);
+        })
+        .getSheetInfo();
+    }
+
+    // Utility functions
+    function formatTime(timestamp) {
+      if (!timestamp) return '';
+      
+      const date = new Date(timestamp);
+      const now = new Date();
+      const diffHours = Math.floor((now - date) / (1000 * 60 * 60));
+      
+      if (diffHours < 1) return 'Just now';
+      if (diffHours < 24) return `${diffHours}h ago`;
+      if (diffHours < 48) return 'Yesterday';
+      
+      return date.toLocaleDateString();
+    }
+
+    function showToast(message, type = 'info') {
+      const toast = document.getElementById('toast');
+      const toastMessage = document.getElementById('toastMessage');
+      const toastIcon = document.getElementById('toastIcon');
+      
+      toast.className = 'toast show ' + type;
+      toastMessage.textContent = message;
+      
+      if (type === 'error') {
+        toastIcon.textContent = 'error';
+      } else if (type === 'success') {
+        toastIcon.textContent = 'check_circle';
+      } else {
+        toastIcon.textContent = 'info';
+      }
+      
+      setTimeout(() => {
+        toast.classList.remove('show');
+      }, 4000);
+    }
+  </script>
+</body>
+</html>
