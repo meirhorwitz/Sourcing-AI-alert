@@ -46,6 +46,7 @@ function getSettings() {
     prompt: getDefaultPrompt(),
     emailRecipients: DEFAULT_TARGET_EMAIL_FOR_NOTIFICATIONS,
     conditionalRecipient: DEFAULT_CONDITIONAL_SELLER_RECIPIENT,
+    notificationsEnabled: true,
     triggers: {
       dataUpdate: { enabled: true, time: '10:00' },
       aiProcessing: { enabled: true, interval: 15 }
@@ -91,6 +92,21 @@ Status: [status]
 Needs attention: [yes/no]
 Last message: [summary]
 Why: [reason if needs attention]`;
+}
+
+function getAvailableOpenAIModels() {
+  const apiKey = PropertiesService.getScriptProperties().getProperty(OPENAI_API_KEY_PROPERTY_NAME);
+  if (!apiKey) return [];
+  try {
+    const response = UrlFetchApp.fetch('https://api.openai.com/v1/models', {
+      headers: { Authorization: 'Bearer ' + apiKey }
+    });
+    const data = JSON.parse(response.getContentText());
+    return data.data.map(m => m.id);
+  } catch (e) {
+    Logger.log('Failed to fetch models: ' + e);
+    return [];
+  }
 }
 
 // =================================================================================
@@ -452,19 +468,32 @@ function sendManualNotifications(conversationIds) {
   if (alerts.length === 0) {
     return { success: false, message: "No conversations found" };
   }
-  
+
   const settings = getSettings();
+  if (!settings.notificationsEnabled) {
+    return { success: false, message: "Notifications are disabled" };
+  }
+
   const recipients = settings.emailRecipients.join(',');
   const subject = `Manual Alert: ${alerts.length} conversation${alerts.length > 1 ? 's' : ''} need attention`;
-  
-  const htmlBody = buildManualNotificationHtml(alerts);
-  
-  MailApp.sendEmail({
-    to: recipients,
-    subject: subject,
-    htmlBody: htmlBody
+
+  const grouped = {};
+  alerts.forEach(a => {
+    const email = a.expertEmail || recipients;
+    if (!grouped[email]) grouped[email] = [];
+    grouped[email].push(a);
   });
-  
+
+  Object.keys(grouped).forEach(email => {
+    const htmlBody = buildManualNotificationHtml(grouped[email]);
+    MailApp.sendEmail({
+      to: email,
+      cc: recipients,
+      subject: subject,
+      htmlBody: htmlBody
+    });
+  });
+
   return { success: true, message: `Notification sent for ${alerts.length} conversations` };
 }
 
@@ -724,6 +753,10 @@ function processSheetWithAI() {
 function processSheetForEmailNotifications() {
   const settings = getSettings();
   const recipients = settings.emailRecipients;
+  if (!settings.notificationsEnabled) {
+    Logger.log("Notifications are disabled.");
+    return;
+  }
   
   const lock = LockService.getScriptLock();
   if (!lock.tryLock(30000)) {
@@ -772,19 +805,27 @@ function processSheetForEmailNotifications() {
       return;
     }
     
-    // Send main digest
+    // Send digest grouped by expert
     const subject = `Daily Sourcing Digest: ${alerts.length} conversation${alerts.length > 1 ? 's' : ''} need attention`;
-    const htmlBody = buildDigestHtml(alerts);
-    
-    recipients.forEach(email => {
+    const grouped = {};
+    alerts.forEach(a => {
+      const email = a.expertEmail || '';
+      if (!grouped[email]) grouped[email] = [];
+      grouped[email].push(a);
+    });
+
+    Object.keys(grouped).forEach(email => {
+      const htmlBody = buildDigestHtml(grouped[email]);
+      const to = email || recipients.join(',');
       MailApp.sendEmail({
-        to: email,
+        to: to,
+        cc: recipients.join(','),
         subject: subject,
         htmlBody: htmlBody
       });
     });
-    
-    Logger.log(`Sent digest with ${alerts.length} alerts to ${recipients.length} recipients.`);
+
+    Logger.log(`Sent digest with ${alerts.length} alerts to ${Object.keys(grouped).length} experts.`);
     
   } catch (e) {
     Logger.log("Error in processSheetForEmailNotifications: " + e.toString());

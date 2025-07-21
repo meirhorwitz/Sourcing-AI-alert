@@ -784,12 +784,7 @@
       <div class="form-row">
         <div class="form-group">
           <label class="form-label">Model</label>
-          <select class="form-select" id="model">
-            <option value="gpt-4o-mini">GPT-4o Mini</option>
-            <option value="gpt-4o">GPT-4o</option>
-            <option value="gpt-4-turbo">GPT-4 Turbo</option>
-            <option value="gpt-3.5-turbo">GPT-3.5 Turbo</option>
-          </select>
+          <select class="form-select" id="model"></select>
         </div>
         
         <div class="form-group">
@@ -818,6 +813,12 @@
         <label class="form-label">Conditional Recipient (>48h alerts)</label>
         <input type="email" class="form-input" id="conditionalRecipient" placeholder="email@example.com">
         <div class="form-help">Receives alerts only for conversations with >48h seller response time</div>
+      </div>
+      <div class="form-group">
+        <div class="checkbox-group">
+          <input type="checkbox" id="notificationsEnabled">
+          <label for="notificationsEnabled">Enable Expert Notifications</label>
+        </div>
       </div>
     </div>
     
@@ -1077,8 +1078,10 @@
         }
         
         // Time filter
-        if (currentFilter.time !== 'all' && conv.last_message_at) {
-          const messageTime = new Date(conv.last_message_at);
+        if (currentFilter.time !== 'all') {
+          const timeValue = conv.last_message_at || conv.current_time_info || conv.last_message_time;
+          if (!timeValue) return true;
+          const messageTime = new Date(timeValue);
           const now = new Date();
           const hoursDiff = (now - messageTime) / (1000 * 60 * 60);
           
@@ -1227,7 +1230,12 @@
     // Render individual message
     function renderMessage(message, analysisReason) {
       const isBuyer = message.sender === 'Buyer';
-      const shouldHighlight = analysisReason && message.text.toLowerCase().includes(analysisReason.toLowerCase().substring(0, 20));
+      let shouldHighlight = false;
+      if (analysisReason) {
+        const textLower = message.text.toLowerCase();
+        const keywords = analysisReason.toLowerCase().split(/\s+/).slice(0, 5);
+        shouldHighlight = keywords.some(k => k.length > 3 && textLower.includes(k));
+      }
       
       return `
         <div class="message">
@@ -1391,11 +1399,12 @@
         .withSuccessHandler(function(settings) {
           // API key is displayed as configured in properties (read-only)
           document.getElementById('apiKey').value = settings.openaiApiKey ? 'Configured' : 'Not configured';
-          document.getElementById('model').value = settings.model || 'gpt-4o-mini';
+          loadModels(settings.model);
           document.getElementById('temperature').value = settings.temperature || 0.2;
           document.getElementById('prompt').value = settings.prompt || '';
           document.getElementById('emailRecipients').value = settings.emailRecipients.join(', ');
           document.getElementById('conditionalRecipient').value = settings.conditionalRecipient || '';
+          document.getElementById('notificationsEnabled').checked = settings.notificationsEnabled !== false;
           document.getElementById('dataUpdateEnabled').checked = settings.triggers.dataUpdate.enabled;
           document.getElementById('dataUpdateTime').value = settings.triggers.dataUpdate.time;
           document.getElementById('aiProcessingEnabled').checked = settings.triggers.aiProcessing.enabled;
@@ -1407,6 +1416,17 @@
         .getSettings();
     }
 
+    function loadModels(selected) {
+      google.script.run
+        .withSuccessHandler(function(models) {
+          const select = document.getElementById('model');
+          select.innerHTML = models.map(m => `<option value="${m}">${m}</option>`).join('');
+          if (selected && models.includes(selected)) select.value = selected;
+        })
+        .withFailureHandler(function() { console.error('Failed to load models'); })
+        .getAvailableOpenAIModels();
+    }
+
     function saveSettings() {
       const settings = {
         // Don't include API key as it's managed in script properties
@@ -1416,6 +1436,7 @@
         prompt: document.getElementById('prompt').value,
         emailRecipients: document.getElementById('emailRecipients').value.split(',').map(e => e.trim()).filter(e => e),
         conditionalRecipient: document.getElementById('conditionalRecipient').value,
+        notificationsEnabled: document.getElementById('notificationsEnabled').checked,
         triggers: {
           dataUpdate: {
             enabled: document.getElementById('dataUpdateEnabled').checked,
