@@ -394,6 +394,11 @@
       font-size: 16px;
       color: var(--text-primary);
     }
+
+    .detail-value a {
+      color: var(--accent-color);
+      text-decoration: none;
+    }
     
     /* AI Analysis Box */
     .ai-analysis {
@@ -731,10 +736,10 @@
       <div class="filter-section">
         <div class="filter-label">Time</div>
         <div class="filter-options">
-          <button class="filter-chip active" onclick="filterByTime('all')">All Time</button>
-          <button class="filter-chip" onclick="filterByTime('24h')">Last 24h</button>
-          <button class="filter-chip" onclick="filterByTime('48h')">Last 48h</button>
-          <button class="filter-chip" onclick="filterByTime('week')">Last Week</button>
+          <button class="filter-chip active" onclick="filterByTime(event, 'all')">All Time</button>
+          <button class="filter-chip" onclick="filterByTime(event, '24h')">Last 24h</button>
+          <button class="filter-chip" onclick="filterByTime(event, '48h')">Last 48h</button>
+          <button class="filter-chip" onclick="filterByTime(event, 'week')">Last Week</button>
         </div>
       </div>
       
@@ -1118,7 +1123,7 @@
       renderConversationsList();
     }
 
-    function filterByTime(time) {
+    function filterByTime(event, time) {
       currentFilter.time = time;
       document.querySelectorAll('.filter-section:last-child .filter-chip').forEach(chip => {
         chip.classList.remove('active');
@@ -1156,11 +1161,15 @@
           <div class="detail-grid">
             <div class="detail-item">
               <div class="detail-label">Buyer</div>
-              <div class="detail-value">${selectedConversation.buyer_name || 'Unknown'}</div>
+              <div class="detail-value">
+                ${selectedConversation.buyer_name ? `<a href="https://fiverr.com/inbox/${selectedConversation.buyer_name}" target="_blank">${selectedConversation.buyer_name}</a>` : 'Unknown'}
+              </div>
             </div>
             <div class="detail-item">
               <div class="detail-label">Seller</div>
-              <div class="detail-value">${selectedConversation.seller_name || 'Unknown'}</div>
+              <div class="detail-value">
+                ${selectedConversation.seller_name ? `<a href="https://fiverr.com/inbox/${selectedConversation.seller_name}" target="_blank">${selectedConversation.seller_name}</a>` : 'Unknown'}
+              </div>
             </div>
             <div class="detail-item">
               <div class="detail-label">Expert</div>
@@ -1205,27 +1214,24 @@
 
     // Parse conversation messages
     function parseConversationMessages(messagesText) {
-  if (!messagesText) return [];
-  
-  const messages = [];
-  // Corrected line: Split by the newline character '\n', not the literal string '\\n'
-  const lines = messagesText.split('\n\n'); 
-  
-  lines.forEach(line => {
-    // The regex might need to be slightly adjusted for multiline content within a single message
-    // Using 's' flag allows '.' to match newline characters within the message text itself.
-    const match = line.match(/^(\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}) – (Buyer|Seller): (.*)$/s);
-    if (match) {
-      messages.push({
-        timestamp: match[1],
-        sender: match[2],
-        text: match[3].trim() // Use trim() to clean up whitespace
+      if (!messagesText) return [];
+
+      const messages = [];
+      const lines = messagesText.split(/\r?\n+/);
+
+      lines.forEach(line => {
+        const match = line.match(/^(\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2})\s[\u2013-]\s(Buyer|Seller):\s*(.*)$/);
+        if (match) {
+          messages.push({
+            timestamp: match[1],
+            sender: match[2],
+            text: match[3].trim()
+          });
+        }
       });
+
+      return messages;
     }
-  });
-  
-  return messages;
-}
 
     // Render individual message
     function renderMessage(message, analysisReason) {
@@ -1236,7 +1242,7 @@
         const keywords = analysisReason.toLowerCase().split(/\s+/).slice(0, 5);
         shouldHighlight = keywords.some(k => k.length > 3 && textLower.includes(k));
       }
-      
+
       return `
         <div class="message">
           <div class="message-avatar ${isBuyer ? 'message-buyer' : 'message-seller'}">
@@ -1245,7 +1251,7 @@
           <div class="message-content">
             <div class="message-header">
               <span class="message-sender">${message.sender}</span>
-              <span class="message-time">${formatTime(message.timestamp)}</span>
+              <span class="message-time">${formatFullTime(message.timestamp)}</span>
             </div>
             <div class="message-text">
               ${shouldHighlight ? `<span class="message-highlight">${message.text}</span>` : message.text}
@@ -1599,6 +1605,12 @@ ${sheetsInfo}`);
       if (diffHours < 48) return 'Yesterday';
       
       return date.toLocaleDateString();
+    }
+
+    function formatFullTime(timestamp) {
+      if (!timestamp) return '';
+      const date = new Date(timestamp);
+      return date.toLocaleString();
     }
 
     function showToast(message, type = 'info') {
