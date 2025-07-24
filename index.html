@@ -1035,12 +1035,12 @@
       
       listContainer.innerHTML = filteredConversations.map(conv => {
         try {
-          const needsAttention = conv['need attention?']?.toLowerCase() === 'yes';
+          const needsAttention = conv['need attention?'] && String(conv['need attention?']).toLowerCase() === 'yes';
           const status = needsAttention ? 'attention' : 'resolved';
           const isSelected = selectedConversations.has(conv.conversation_id);
           
           return `
-            <div class="conversation-item ${selectedConversation?.conversation_id === conv.conversation_id ? 'selected' : ''}" 
+            <div class="conversation-item ${selectedConversation && selectedConversation.conversation_id === conv.conversation_id ? 'selected' : ''}"
                  onclick="selectConversation('${conv.conversation_id}')">
               <input type="checkbox" 
                      class="conversation-checkbox" 
@@ -1077,7 +1077,7 @@
         
         // Status filter
         if (currentFilter.status !== 'all') {
-          const needsAttention = conv['need attention?']?.toLowerCase() === 'yes';
+          const needsAttention = conv['need attention?'] && String(conv['need attention?']).toLowerCase() === 'yes';
           if (currentFilter.status === 'attention' && !needsAttention) return false;
           if (currentFilter.status === 'resolved' && needsAttention) return false;
         }
@@ -1153,7 +1153,7 @@
     function renderConversationDetails() {
       if (!selectedConversation) return;
       
-      const needsAttention = selectedConversation['need attention?']?.toLowerCase() === 'yes';
+      const needsAttention = selectedConversation['need attention?'] && String(selectedConversation['need attention?']).toLowerCase() === 'yes';
       const messages = parseConversationMessages(selectedConversation.conversation_messages);
       
       const detailsHtml = `
@@ -1536,13 +1536,13 @@
         .withSuccessHandler(function(result) {
           console.log('Sheet Debug Info:', result);
           if (result.error) {
-            alert(`Error: ${result.error}\n\nAvailable sheets: ${result.sheets?.join(', ') || 'Unknown'}`);
+            alert(`Error: ${result.error}\n\nAvailable sheets: ${result.sheets ? result.sheets.join(', ') : 'Unknown'}`);
           } else {
             alert(`Sheet: ${result.sheetName}
 Total Rows: ${result.totalRows}
 Has Data: ${result.hasData}
 Headers: ${result.headers.slice(0, 5).join(', ')}...
-First Row Sample: ${JSON.stringify(result.firstDataRow?.slice(0, 3))}`);
+First Row Sample: ${JSON.stringify(result.firstDataRow ? result.firstDataRow.slice(0, 3) : [])}`);
           }
         })
         .withFailureHandler(function(error) {

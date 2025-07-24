@@ -397,15 +397,15 @@ function getAiAnalysisForRow(rowData, colIdx) {
     if (responseCode !== 200) return { error: `API Error ${responseCode}: ${responseBody}` };
     
     const jsonResponse = JSON.parse(responseBody);
-    const rawResponse = jsonResponse.choices?.[0]?.message?.content.trim() || "";
+    const rawResponse = jsonResponse.choices && jsonResponse.choices[0] && jsonResponse.choices[0].message && jsonResponse.choices[0].message.content.trim() || "";
     
     if (!rawResponse) return { error: "Empty AI response" };
     
     const responseLines = rawResponse.split('\n').filter(line => line.trim() !== '');
-    const aiStatus = responseLines[0]?.replace(/^Status:\s*/i, '').trim() || "N/A";
-    const needsAttention = responseLines[1]?.replace(/^Needs attention:\s*/i, '').trim() || "N/A";
-    const lastMessage = responseLines[2]?.replace(/^Last message:\s*/i, '').trim() || "N/A";
-    const why = responseLines[3]?.replace(/^Why:\s*/i, '').trim() || "N/A";
+    const aiStatus = responseLines[0] ? responseLines[0].replace(/^Status:\s*/i, '').trim() : "N/A";
+    const needsAttention = responseLines[1] ? responseLines[1].replace(/^Needs attention:\s*/i, '').trim() : "N/A";
+    const lastMessage = responseLines[2] ? responseLines[2].replace(/^Last message:\s*/i, '').trim() : "N/A";
+    const why = responseLines[3] ? responseLines[3].replace(/^Why:\s*/i, '').trim() : "N/A";
     
     let processingStatus = "Processed";
     let warning = null;
@@ -784,7 +784,7 @@ function processSheetForEmailNotifications() {
     
     for (let i = 1; i < data.length; i++) {
       const row = data[i];
-      const needsAttention = row[colIdx['need attention?']]?.toString().toLowerCase();
+      const needsAttention = row[colIdx['need attention?']] ? row[colIdx['need attention?']].toString().toLowerCase() : undefined;
       
       if (needsAttention === 'yes') {
         alerts.push({
