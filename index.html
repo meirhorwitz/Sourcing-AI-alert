@@ -1220,7 +1220,7 @@
       const lines = messagesText.split(/\r?\n+/);
 
       lines.forEach(line => {
-        const match = line.match(/^(\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2})\s[\u2013-]\s(Buyer|Seller):\s*(.*)$/);
+        const match = line.match(/^(\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2})\s[-\u2013]\s(Buyer|Seller):\s*(.*)$/);
         if (match) {
           messages.push({
             timestamp: match[1],
