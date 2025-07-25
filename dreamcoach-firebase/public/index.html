@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>DreamCoach</title>
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600&family=Poppins:wght@300;400;500&display=swap" rel="stylesheet">
+  <link href="styles.css" rel="stylesheet">
+</head>
+<body>
+  <header class="header">
+    <h1 class="logo">🌙 DreamCoach</h1>
+  </header>
+
+  <main class="container">
+    <form id="dreamForm" class="card">
+      <h2>Submit Your Dream</h2>
+      <label>Name<input type="text" id="name" required></label>
+      <label>Email<input type="email" id="email" required></label>
+      <label>Dream Date<input type="date" id="dreamDate" required></label>
+      <label>Description<textarea id="description" required></textarea></label>
+      <button type="submit">Analyze Dream</button>
+    </form>
+    <div id="result" class="card hidden"></div>
+  </main>
+
+  <script type="module" src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app.js"></script>
+  <script type="module" src="https://www.gstatic.com/firebasejs/9.23.0/firebase-analytics.js"></script>
+  <script type="module" src="app.js"></script>
+</body>
+</html>

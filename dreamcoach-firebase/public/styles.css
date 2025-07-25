@@ -1,0 +1,70 @@
+body {
+  font-family: 'Poppins', sans-serif;
+  background: linear-gradient(135deg, #0d0221, #1d1a39);
+  color: #f0f0f0;
+  min-height: 100vh;
+  margin: 0;
+}
+
+.header {
+  padding: 20px;
+  text-align: center;
+  background: rgba(0,0,0,0.4);
+  backdrop-filter: blur(4px);
+}
+
+.logo {
+  font-family: 'Orbitron', sans-serif;
+  margin: 0;
+}
+
+.container {
+  display: flex;
+  justify-content: center;
+  margin-top: 40px;
+}
+
+.card {
+  background: rgba(20,20,43,0.8);
+  padding: 20px;
+  border-radius: 8px;
+  width: 320px;
+  box-shadow: 0 0 10px rgba(0,0,0,0.6);
+}
+
+.card h2 {
+  margin-top: 0;
+  font-family: 'Orbitron', sans-serif;
+  font-size: 20px;
+  text-align: center;
+}
+
+.card label {
+  display: block;
+  margin-bottom: 12px;
+  font-size: 14px;
+}
+
+.card input,
+.card textarea {
+  width: 100%;
+  padding: 8px;
+  border: none;
+  border-radius: 4px;
+  margin-top: 4px;
+  font-family: inherit;
+}
+
+.card button {
+  margin-top: 12px;
+  width: 100%;
+  padding: 10px;
+  background: #8a4fff;
+  border: none;
+  color: #fff;
+  border-radius: 4px;
+  cursor: pointer;
+  font-family: 'Orbitron', sans-serif;
+}
+
+.hidden { display: none; }

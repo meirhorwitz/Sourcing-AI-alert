@@ -1,0 +1,17 @@
+{
+  "name": "dreamcoach-functions",
+  "description": "Cloud Functions for DreamCoach",
+  "scripts": {
+    "start": "firebase emulators:start --only functions",
+    "deploy": "firebase deploy --only functions"
+  },
+  "dependencies": {
+    "firebase-admin": "^11.10.1",
+    "firebase-functions": "^4.1.1",
+    "node-fetch": "^3.3.2",
+    "nodemailer": "^6.9.6"
+  },
+  "engines": {
+    "node": "18"
+  }
+}
