@@ -13,6 +13,8 @@ const DEFAULT_CONDITIONAL_SELLER_RECIPIENT = "meir.horwitz@fiverr.com";
 
 // --- OpenAI API CONFIGURATION ---
 const OPENAI_API_URL = 'https://api.openai.com/v1/chat/completions';
+// Limit the number of conversations returned to avoid execution timeouts
+const MAX_CONVERSATIONS = 200;
 
 // --- BATCH AI PROCESSING COLUMN CONFIGURATION (uses header names) ---
 const AI_PROMPT_COLUMN_NAME = "prompt_for_ai";
@@ -928,10 +930,12 @@ function getConversations() {
       return { data: [], error: `Sheet "${TARGET_SHEET_NAME}" not found` };
     }
     
-    const data = sheet.getDataRange().getValues();
-    
-    // Keep the limit for now to ensure the function completes
-    //if (data.length > 50) data.length = 50; 
+    const data = sheet.getDataRange().getDisplayValues();
+
+    // Limit to avoid exceeding execution time
+    if (data.length - 1 > MAX_CONVERSATIONS) {
+      data.length = MAX_CONVERSATIONS + 1;
+    }
     
     if (data.length < 2) {
       console.log('No data rows found in sheet');
